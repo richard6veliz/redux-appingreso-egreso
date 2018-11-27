@@ -1,22 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AuthService} from "../auth.service";
+import {Store} from "@ngrx/store";
+import {AppState} from "../../app.reducer";
+import {Subscription} from "rxjs/index";
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styles: []
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
 
-  constructor(public authService:AuthService) { }
+  cargando: boolean;
+  subscription: Subscription;
 
-  ngOnInit() {
+  constructor(public authService: AuthService,
+              public store: Store<AppState>) {
   }
 
-  onSubmit(data:any){
-    // console.log(data);
+  ngOnInit() {
+    this.subscription = this.store.select('ui')
+      .subscribe(ui => {
+        this.cargando = ui.isLoading;
+      });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  onSubmit(data: any) {
     this.authService
-      .crearUsuario(data.nombre,data.email,data.password);
+      .crearUsuario(data.nombre, data.email, data.password);
   }
 
 }
